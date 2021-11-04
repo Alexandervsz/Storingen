@@ -4,7 +4,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 
-def cleanData(): #Specifiek script voor deze dataset, returned een dataset.
+
+def clean_data():  # Specifiek script voor deze dataset, returned een dataset.
     data = pd.read_csv("sap_storing_data_hu_project.csv")
     storingen = pd.DataFrame(data=data, index=data.index,
                              columns=['stm_oorz_groep', 'stm_oorz_code', 'stm_geo_gst', 'stm_fh_ddt',
@@ -12,22 +13,18 @@ def cleanData(): #Specifiek script voor deze dataset, returned een dataset.
                                       'stm_aanngeb_dd', 'stm_aanngeb_tijd', 'stm_aanntpl_dd',
                                       'stm_aanntpl_tijd', 'stm_fh_dd', 'stm_fh_tijd', 'stm_fh_duur',
                                       'stm_sap_storeinddatum', 'stm_sap_storeindtijd',
-                                       'stm_prioriteit'])
-
+                                      'stm_prioriteit'])
     storingen = storingen.iloc[1:, :]
     storingen = storingen.drop_duplicates()
     storingen = storingen.convert_dtypes()
-
     # Lege values priority 9 geven.
     storingen['stm_prioriteit'] = storingen['stm_prioriteit'].fillna(9)
-
     # Hieronder wordt een nieuwe code aangemaakt voor onbekende stm_ooz_codes, 0.
     storingen['stm_oorz_code'] = storingen['stm_oorz_code'].astype(str)
     storingen['stm_oorz_code'] = storingen['stm_oorz_code'].str.replace('<NA>', '0')
     storingen['stm_oorz_code'] = storingen['stm_oorz_code'].fillna('0')
     storingen['stm_oorz_code'] = storingen['stm_oorz_code'].astype(int)
-
-    # Hieronder word stm_fh_duur opgeschoond. Allereest verwijderen we alles waarbij de duur 0 is, omdat we niet geinteresseerd zijn in dit voorspellen, omdat de dienstregeling hierdoor niet verstoord wordt. Darnaast verwijderen we ook alle sterke outliers, zodat de data minder ruis bevat.
+    # Verwijderen van 0
     storingen = storingen[storingen.stm_fh_duur != 0]
 
     # Outlier cleanup
@@ -37,7 +34,7 @@ def cleanData(): #Specifiek script voor deze dataset, returned een dataset.
     IQR = q3 - q1
     storingen = storingen[storingen.stm_fh_duur < 3 * IQR]
 
-    # Hieronder worden alle stm_geo_gst die niet numeriek zijn, verwijderd, zodat deze hele kolom kan worden omgezet tot een int. Hierdoor kan het model hiermee kan werken.
+    # Hieronder worden alle stm_geo_gst die niet numeriek zijn, verwijderd, zodat deze hele kolom kan worden omgezet tot een int.
     storingen = storingen[storingen.stm_geo_gst.astype(str).apply(lambda x: x.isnumeric())]
     storingen["stm_geo_gst"] = storingen["stm_geo_gst"].astype(int)
 
@@ -77,53 +74,58 @@ def cleanData(): #Specifiek script voor deze dataset, returned een dataset.
     storingen = storingen.join(dummies)
     return storingen
 
-def writeCSV(data, csvName):
-    data.to_csv(path_or_buf=csvName,index=False, mode='w',sep=';')
 
-def trainTest(storingen):
+def write_csv(data, name):
+    data.to_csv(path_or_buf=name, index=False, mode='w', sep=';')
+
+
+def train_test(storingen):
     # Allereerst moeten de x en de y worden bepaald.
     x = storingen[['stm_sap_meldtijd', 'stm_aanntpl_tijd']]
     y = storingen['stm_fh_duur']
     y = y.astype('int')
 
     # Daarna worden deze opgesplitst in een train en een test set.
-    X_train, X_test, Y_train, Y_test = train_test_split(x, y)
-    return X_train, X_test, Y_train, Y_test
+    x_train, x_test, y_train, y_test = train_test_split(x, y)
+    return x_train, x_test, y_train, y_test
 
-def decisionTree(depth, X_train, X_test, Y_train, Y_test):
+
+def decision_tree(depth, x_train, x_test, y_train, y_test):
     # Nu we onze data goed hebben voorbereid, kunnen er modellen mee getraind worden.
     # Allereerst trainen we een DecisionTreeClassifier, en bepalen we de score.
     boom = DecisionTreeClassifier(max_depth=depth)
-    boom.fit(X_train, Y_train)
-    acc = boom.score(X_test, Y_test)
-    # print("Acc: " + str(acc))
-
-    # Hieronder staat het script dat de beste waarde voor de max depth opzoekt. We zijn hier geintereseerd in de waarde waar de curve afvlakt.
-
+    boom.fit(x_train, y_train)
+    acc = boom.score(x_test, y_test)
     return acc, boom
 
-def kMeans(neighbours, X_train, X_test, Y_train, Y_test):
+
+def k_means(neighbours, x_train, x_test, y_train, y_test):
     # Nu trainen we ook een KNN model. Dit doen we ten eerste om te kijken welk model beter scoort, maar ook als een controle of ons eerste model niet overfit is.
     knn = KNeighborsClassifier(n_neighbors=neighbours)
-    knn.fit(X_train, Y_train)
+    knn.fit(x_train, y_train)
     knn.set_params(weights="distance")
-    acc = knn.score(X_test, Y_test)
+    acc = knn.score(x_test, y_test)
     # print("Model Accuracy: " + str(acc))
     return acc, knn
 
-def prediction(list, classifier):
-    prediction = classifier.predict([list])
-    return prediction
 
-def writeJobLib(tree, kMeans):
+def prediction(targets, classifier):
+    pred = classifier.predict([targets])
+    return pred
+
+
+def write_joblib(tree, kmeans):
     dump(tree, 'tree.joblib')
-    dump(kMeans, 'kMeans.joblib')
+    dump(kmeans, 'kMeans.joblib')
 
-def loadJobLib():
+
+def load_joblib():
     tree = load('tree.joblib')
-    kMeans = load('kMeans.joblib')
-    return tree, kMeans
+    kmeans = load('kMeans.joblib')
+    return tree, kmeans
 
+
+write_csv(clean_data(), 'cleaned.csv')
 # storingen = pd.read_csv("cleaned.csv",sep=';')
 # X_train, X_test, Y_train, Y_test = trainTest(storingen)
 # treeAcc, tree = decisionTree(52,X_train, X_test, Y_train, Y_test)
