@@ -1,3 +1,5 @@
 /Jupyter/sap_storing_data_hu_project.csv
 /venv/
 /Application/sap_storing_data_hu_project.csv
+/Application/tree.joblib
+/Application/kMeans.joblib

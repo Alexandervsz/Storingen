@@ -84,7 +84,6 @@ def train_test(storingen):
     x = storingen[['stm_sap_meldtijd', 'stm_aanntpl_tijd']]
     y = storingen['stm_fh_duur']
     y = y.astype('int')
-
     # Daarna worden deze opgesplitst in een train en een test set.
     x_train, x_test, y_train, y_test = train_test_split(x, y)
     return x_train, x_test, y_train, y_test
@@ -100,12 +99,10 @@ def decision_tree(depth, x_train, x_test, y_train, y_test):
 
 
 def k_means(neighbours, x_train, x_test, y_train, y_test):
-    # Nu trainen we ook een KNN model. Dit doen we ten eerste om te kijken welk model beter scoort, maar ook als een controle of ons eerste model niet overfit is.
     knn = KNeighborsClassifier(n_neighbors=neighbours)
     knn.fit(x_train, y_train)
     knn.set_params(weights="distance")
     acc = knn.score(x_test, y_test)
-    # print("Model Accuracy: " + str(acc))
     return acc, knn
 
 
@@ -125,8 +122,19 @@ def load_joblib():
     return tree, kmeans
 
 
-write_csv(clean_data(), 'cleaned.csv')
-# storingen = pd.read_csv("cleaned.csv",sep=';')
-# X_train, X_test, Y_train, Y_test = trainTest(storingen)
-# treeAcc, tree = decisionTree(52,X_train, X_test, Y_train, Y_test)
-# kMeansAcc, kMeans = kMeans(55, X_train, X_test, Y_train, Y_test)
+# write_csv(clean_data(), 'cleaned.csv')
+
+# storingen = pd.read_csv("cleaned.csv", sep=';')
+# x_train, x_test, y_train, y_test = train_test(storingen)
+# # treeAcc, tree = decision_tree(52, x_train, x_test, y_train, y_test)
+# # kMeansAcc, kmeans = k_means(55, x_train, x_test, y_train, y_test)
+# # print(treeAcc, kMeansAcc)
+# # #
+# # print('writing...')
+# # write_joblib(tree, kmeans)
+#
+# tree, kmeans = load_joblib()
+#
+# print(tree.score(x_test, y_test))
+# print(kmeans.score(x_test, y_test))
+
