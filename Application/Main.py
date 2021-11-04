@@ -13,20 +13,19 @@ root = Tk()
 root.geometry("500x300")
 
 
-def dataGet():
+def data_get():
     print("Hello")
 
 
-def beginClick():
-    clicked = Label(root, text="Klicked.")
+def begin_click():
+    clicked = Label(root, text="Clicked.")
     clicked.grid(row=4, column=1)
-    tree, kMeans = load_joblib()
-
+    tree, k_means = load_joblib()
     sap_tijd = str(invoer1_1.get()) + str(invoer1_2.get()) + "00"
     monteur_tijd = str(invoer2_1.get()) + str(invoer2_2.get()) + "00"
-    magie = prediction([int(sap_tijd), int(monteur_tijd)], tree)
+    pred = prediction([int(sap_tijd), int(monteur_tijd)], tree)
     uitvoer.delete(0, END)
-    uitvoer.insert(0, magie[0])
+    uitvoer.insert(0, pred[0])
 
 
 # Label widgets.
@@ -37,7 +36,7 @@ inText2 = Label(root, text="Aannemer Ter Plaatse")
 # inText3 = Label(root, text="Text3")
 
 # Button widgets.
-beginButton = Button(root, text="Begin", command=beginClick)
+beginButton = Button(root, text="Begin", command=begin_click)
 
 # Input field widgets.
 invoer1_1 = Entry(root)
