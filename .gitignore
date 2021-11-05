@@ -4,3 +4,5 @@
 /Application/tree.joblib
 /Application/kMeans.joblib
 /.idea
+/Application/x_test.joblib
+/Application/y_test.joblib

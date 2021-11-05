@@ -111,30 +111,33 @@ def prediction(targets, classifier):
     return pred
 
 
-def write_joblib(tree, kmeans):
+def write_joblib(tree, kmeans, x_test, y_test):
     dump(tree, 'tree.joblib')
     dump(kmeans, 'kMeans.joblib')
-
+    dump(x_test, 'x_test.joblib')
+    dump(y_test, 'y_test.joblib')
 
 def load_joblib():
     tree = load('tree.joblib')
     kmeans = load('kMeans.joblib')
-    return tree, kmeans
+    x_test = load('x_test.joblib')
+    y_test = load('y_test.joblib')
+    return tree, kmeans, x_test, y_test
 
 
 # write_csv(clean_data(), 'cleaned.csv')
 
-# storingen = pd.read_csv("cleaned.csv", sep=';')
-# x_train, x_test, y_train, y_test = train_test(storingen)
-# # treeAcc, tree = decision_tree(52, x_train, x_test, y_train, y_test)
-# # kMeansAcc, kmeans = k_means(55, x_train, x_test, y_train, y_test)
+#storingen = pd.read_csv("cleaned.csv", sep=';')
+#x_train, x_test, y_train, y_test = train_test(storingen)
+#treeAcc, tree = decision_tree(52, x_train, x_test, y_train, y_test)
+#kMeansAcc, kmeans = k_means(55, x_train, x_test, y_train, y_test)
 # # print(treeAcc, kMeansAcc)
 # # #
-# # print('writing...')
-# # write_joblib(tree, kmeans)
+#print('writing...')
+#write_joblib(tree, kmeans, x_test, y_test)
 #
-# tree, kmeans = load_joblib()
+tree, kmeans, x_test, y_test = load_joblib()
 #
-# print(tree.score(x_test, y_test))
-# print(kmeans.score(x_test, y_test))
+print(tree.score(x_test, y_test))
+print(kmeans.score(x_test, y_test))
 
